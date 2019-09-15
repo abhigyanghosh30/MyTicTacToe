@@ -22,7 +22,7 @@ contract tic {
         {
             for(uint8 j=0;j<3;j++)
             {
-                board[i][j]==Board.Empty;
+                board[i][j]=Board.Empty;
             }
         }
     }
@@ -68,15 +68,13 @@ contract tic {
     function startNewGame() public {
         cm=0;
         games+=1;
-        p1=0x0;
-        p2=0x0;
         //owner=0x0;
         for(uint8 i=0;i<3;i++)
         {
             
             for(uint8 j=0;j<3;j++)
             {
-                board[i][j]==Board.Empty;
+                board[i][j]=Board.Empty;
             }
         }
         
@@ -118,18 +116,19 @@ contract tic {
        
         //require(cm<=9);
         require(InBounds(x,y));
-        // require(!over());
+        require(!over());
         require(turn()==msg.sender);
-        if(over())
-        startNewGame();
-        else{
-            require(board[x][y]==Board.Empty);
-            require(!over());
-            board[x][y] = player();
-            cm+=1;
-            //return (true,cm);
         
-        }
+        require(board[x][y]==Board.Empty);
+        require(!over());
+        board[x][y] = player();
+        cm+=1;
+        
+        if(over())
+            startNewGame();
+
+        //return (true,cm);
+    
         
     }
     

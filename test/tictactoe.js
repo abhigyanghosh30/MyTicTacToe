@@ -25,7 +25,13 @@ contract('tic',function(accounts){
         });
     });
     it("Player should be able to make a move",()=>{
-        new_instance.Move(1,1,{from:accounts[0]}).then((ret_vals)=>{
+        return TicTacToe.deployed().then((instance)=>{
+            new_instance = instance;
+        }).then(()=>{
+            new_instance.joinGame({from:accounts[1],value:web3.utils.toWei("1","ether")});
+        }).then(()=>{
+            return new_instance.Move(1,1,{from:accounts[0]});
+        }).then((ret_vals)=>{
             console.log(ret_vals);
         });
     });
