@@ -18,12 +18,12 @@ contract('tic',function(accounts){
     it("Players should be able to join",()=>{
         return TicTacToe.deployed()
         .then(async function(instance){
-            await instance.joinGame({from:accounts[1],value:web3.utils.toWei("1","ether")});
-            await instance.joinGame({from:accounts[2],value:web3.utils.toWei("1","ether")});
+            await instance.joinGame({from:accounts[1],value:web3.utils.toWei("4","ether")});
+            await instance.joinGame({from:accounts[2],value:web3.utils.toWei("4","ether")});
             return instance.getBalance();
         })
         .then(async function(balance){
-            assert.equal(balance.valueOf(),web3.utils.toWei("2","ether"));
+            assert.equal(balance.valueOf(),web3.utils.toWei("8","ether"));
         });
         
     });
@@ -44,13 +44,32 @@ contract('tic',function(accounts){
 
     it("unit testing for InBounds",async function(){
         return TicTacToe.deployed()
-        .then(async function(){
+        .then(async function(instance){
             var a = [];
-            await instance.InBounds().then((data)=>{a.push(data)});
-            await instance.InBounds().then((data)=>{a.push(data)});
-            await instance.InBounds().then((data)=>{a.push(data)});
-            await instance.InBounds().then((data)=>{a.push(data)});
-            await instance.InBounds().then((data)=>{a.push(data)});
+            await instance.InBounds(0,0).then((data)=>{a.push(data)});
+            await instance.InBounds(0,1).then((data)=>{a.push(data)});
+            await instance.InBounds(0,2).then((data)=>{a.push(data)});
+            await instance.InBounds(0,3).then((data)=>{a.push(data)});
+            await instance.InBounds(1,0).then((data)=>{a.push(data)});
+            await instance.InBounds(1,1).then((data)=>{a.push(data)});
+            await instance.InBounds(1,2).then((data)=>{a.push(data)});
+            await instance.InBounds(1,3).then((data)=>{a.push(data)});
+            await instance.InBounds(2,0).then((data)=>{a.push(data)});
+            await instance.InBounds(2,1).then((data)=>{a.push(data)});
+            await instance.InBounds(2,2).then((data)=>{a.push(data)});
+            await instance.InBounds(2,3).then((data)=>{a.push(data)});
+            await instance.InBounds(3,0).then((data)=>{a.push(data)});
+            await instance.InBounds(3,1).then((data)=>{a.push(data)});
+            await instance.InBounds(3,2).then((data)=>{a.push(data)});
+            await instance.InBounds(3,3).then((data)=>{a.push(data)});
+            await instance.InBounds(-1,0).then((data)=>{a.push(data)});
+            await instance.InBounds(-1,1).then((data)=>{a.push(data)});
+            await instance.InBounds(-1,2).then((data)=>{a.push(data)});
+            await instance.InBounds(-1,3).then((data)=>{a.push(data)});
+            return a;
+        }).then((resp)=>{
+            console.log(resp);
+            // assert()
         });
     });
 
@@ -81,6 +100,7 @@ contract('tic',function(accounts){
             return instance.over();
         })
         .then(async function(values){
+            console.log(values);
             assert.isTrue(values);
         }); 
     });

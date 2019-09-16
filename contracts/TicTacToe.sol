@@ -142,8 +142,8 @@ contract tic {
         board[x][y] = player();
         cm+=1;
         
-        // if(over())
-            // startNewGame();
+        if(over())
+            declareWinner();
 
         //return (true,cm);
     
@@ -173,11 +173,9 @@ contract tic {
         return msg.sender;
     }
     
-    function over() public returns(bool) {
+    function over() public view returns(bool) {
         if(cm == 9 || Winner() != Board.Empty )
         {
-            declareWinner();
-            // startNewGame();
             return true;
         }
             
