@@ -1,6 +1,11 @@
+
 var TicTacToe = artifacts.require('tic');
 
 contract('tic',function(accounts){
+
+    // Unit testing
+    // it("Test Move")
+
     it("should deploy the contract",()=>{
         return TicTacToe.deployed().then((instance)=>{
             return instance.getBalance();
@@ -9,124 +14,91 @@ contract('tic',function(accounts){
             assert.equal(balance.valueOf(), web3.utils.toWei("0","ether"), "Ether was paid. Contract should have zero ether before players join");
         });
     });
+
     it("Players should be able to join",()=>{
-        let new_instance;
-        return TicTacToe.deployed().then((instance)=>{
-            new_instance = instance;
+        return TicTacToe.deployed()
+        .then(async function(instance){
+            await instance.joinGame({from:accounts[1],value:web3.utils.toWei("1","ether")});
+            await instance.joinGame({from:accounts[2],value:web3.utils.toWei("1","ether")});
+            return instance.getBalance();
         })
-        .then(()=>{
-            new_instance.joinGame({from:accounts[1],value:web3.utils.toWei("1","ether")});
+        .then(async function(balance){
+            assert.equal(balance.valueOf(),web3.utils.toWei("2","ether"));
+        });
+        
+    });
+
+    it("Unit test for turn taking function",()=>{
+        return TicTacToe.deployed()
+        .then(async function(instance){
+            var a =[];
+            await instance.turn().then((data)=>{a[0]=data});
+            await instance.printPlayers().then((data)=>{a[1]=data['0']});
+            return a;
         })
-        .then(()=>{
-            return new_instance.getBalance();        
-        })
-        .then((balance)=>{
-            assert.equal(balance.valueOf(), web3.utils.toWei("1","ether"), "Final contract balance should have been 1 ether after one player joins");
-            new_instance.joinGame({from:accounts[2],value:web3.utils.toWei("1","ether")});
-            return new_instance.printPlayers();
-        })
-        .then((players_tuple)=>{
-            assert.equal(players_tuple[0],accounts[1]);
-            assert.equal(players_tuple[1],accounts[2]);
-        })
-        .then(()=>{
-            return new_instance.getBalance();        
-        })
-        .then((balance)=>{
-            assert.equal(balance.valueOf(), web3.utils.toWei("2","ether"), "Final contract balance should have been 1 ether after one player joins");
+        .then((a)=>{
+            // console.log(a);
+            assert.equal(a[0],a[1]);
         });
     });
-    it("Player should be able to make a move",()=>{
-        let new_instance;
-        return TicTacToe.deployed().then((instance)=>{
-            new_instance = instance;
-        })
-        .then(()=>{
-            new_instance.joinGame({from:accounts[1],value:web3.utils.toWei("1","ether")});
-        })
-        .then(()=>{
-            new_instance.joinGame({from:accounts[2],value:web3.utils.toWei("1","ether")});
-        })
-        .then(()=>{
-            new_instance.Move(1,1,{from:accounts[1]});
-        })
-        .then(()=>{
-            return new_instance.tostring(1,1);
-        })
-        .then((char)=>{
-            assert.equal(char,"X");
-        })
-        .then((char)=>{
-            new_instance.Move(0,1,{from:accounts[2]});
-        })
-        .then(()=>{
-            return new_instance.tostring(0,1);
-        })
-        .then((char)=>{
-            assert.equal(char,"O");
+
+    it("unit testing for InBounds",async function(){
+        return TicTacToe.deployed()
+        .then(async function(){
+            var a = [];
+            await instance.InBounds().then((data)=>{a.push(data)});
+            await instance.InBounds().then((data)=>{a.push(data)});
+            await instance.InBounds().then((data)=>{a.push(data)});
+            await instance.InBounds().then((data)=>{a.push(data)});
+            await instance.InBounds().then((data)=>{a.push(data)});
         });
     });
-    it("Player should be able to make a move",()=>{
-        let new_instance;
-        return TicTacToe.deployed().then((instance)=>{
-            new_instance = instance;
+
+    it("Players should be able to Move",()=>{
+        return TicTacToe.deployed()
+        .then(async function(instance){
+            await instance.Move(0,0,{from:accounts[1]});
+            await instance.Move(0,1,{from:accounts[2]});
+            let a = [];
+            await instance.tostring(0,0).then((data)=>{return a[0]=data;});
+            await instance.tostring(0,1).then((data)=>{return a[1]=data;});
+            return a;
         })
-        // .then(()=>{
-        //     return new_instance.joinGame({from:accounts[1],value:web3.utils.toWei("1","ether")});
-        // })
-        // .then(()=>{
-        //     return new_instance.joinGame({from:accounts[2],value:web3.utils.toWei("1","ether")});
-        // })
-        // .then(()=>{
-        //     new_instance.Move(1,1,{from:accounts[1]});
-        // })
-        // .then(()=>{
-        //     return new_instance.tostring(1,1);
-        // })
-        // .then((char)=>{
-        //     assert.equal(char,"X");
-        // })
-        // .then((char)=>{
-        //     new_instance.Move(0,1,{from:accounts[2]});
-        // })
-        // .then(()=>{
-        //     return new_instance.tostring(0,1);
-        // })
-        // .then((char)=>{
-        //     assert.equal(char,"O");
-        // })
-        .then((char)=>{
-            new_instance.Move(1,0,{from:accounts[1]});
+        .then(async function(values){
+            // console.log(values);
+            assert.equal(values[0].valueOf(),"X");
+            assert.equal(values[1].valueOf(),"O");
+        });
+        
+    });
+
+    it("Players should be able to Win",()=>{
+        return TicTacToe.deployed()
+        .then(async function(instance){
+            await instance.Move(1,0,{from:accounts[1]});
+            await instance.Move(1,1,{from:accounts[2]});
+            await instance.Move(2,0,{from:accounts[1]});
+            return instance.over();
         })
-        .then(()=>{
-            return new_instance.tostring(1,0);
-        })
-        .then((char)=>{
-            assert.equal(char,"X");
-        })
-        .then((char)=>{
-            new_instance.Move(0,0,{from:accounts[2]});
-        })
-        .then(()=>{
-            return new_instance.tostring(0,0);
-        })
-        .then((char)=>{
-            assert.equal(char,"O");
-        })
-        .then((char)=>{
-            new_instance.Move(2,1,{from:accounts[1]});
-        })
-        .then(()=>{
-            return new_instance.tostring(2,1);
-        })
-        .then((char)=>{
-            assert.equal(char,"X");
-        })
-        .then(()=>{
-            return new_instance.games.call()
-        })
-        .then((ret)=>{
-            assert.equal(ret.valueOf(),1);
+        .then(async function(values){
+            assert.isTrue(values);
+        }); 
+    });
+
+    it("Anyone should be able to start new game when the old game is over", ()=>{
+        return TicTacToe.deployed()
+        .then(async function(instance){
+            await instance.startNewGame();
+            var a=[];
+            await instance.games.call().then((data)=>{a[0]=data});
+            await instance.cm.call().then((data)=>{a[1]=data});
+            return a;
+        }).then((a)=>{
+            assert.equal(a[0].valueOf(),1);
+            assert.equal(a[1].valueOf(),0);
         });
     });
+
+
+
 });
