@@ -1,13 +1,16 @@
 
 var TicTacToe = artifacts.require('tic');
+var Moneys = artifacts.require('moneys');
 
 contract('tic',function(accounts){
 
-    // Unit testing
-    // it("Test Move")
+    // Since we are using accounts[0] as the owner/deployer of the contract, so we exclude him from the testing
 
     it("should deploy the contract",()=>{
-        return TicTacToe.deployed().then((instance)=>{
+        return TicTacToe.deployed().then(async(instance)=>{
+            var owner_ip;
+            await instance.owner.call().then((data)=>{owner_ip = data});
+            assert.equal(accounts[0],owner_ip);
             return instance.getBalance();
         })
         .then((balance)=>{
@@ -15,10 +18,49 @@ contract('tic',function(accounts){
         });
     });
 
-    it("Players should be able to join",()=>{
+    it("Same player cannot join twice",async function(){
+        return TicTacToe.deployed().then(async (instance)=>{
+            try{
+                await instance.joinGame({from:accounts[1],value:web3.utils.toWei("4","ether")});
+                // trying to make accounts[1] join again
+                await instance.joinGame({from:accounts[1],value:web3.utils.toWei("4","ether")});
+            }
+            catch(err){
+                assert(true);
+            }
+        });
+    });
+
+    it("Player cannot join if he doesn't have enough money",async ()=>{
+        return TicTacToe.deployed()
+        .then(async (instance)=>{
+            var balance;
+            
+            // making accounts[3] broke to check if he can afford to pay
+
+            await web3.eth.getBalance(accounts[3]).then((data)=>{balance=data});
+            var money_instance;
+            await Moneys.deployed().then((instance)=>{money_instance = instance});
+            var eth3 =  (await web3.utils.toWei("3","ether"));
+            // console.log(eth3);
+            if(balance > eth3){
+                balance = balance - (await web3.utils.toWei("2" ,"ether"));
+                await money_instance.transferETH(accounts[4],{from:accounts[3],value:balance});            
+                await web3.eth.getBalance(accounts[3]).then((data)=>{balance=data});
+            }
+            try {
+                await instance.joinGame({from:accounts[3],value:web3.utils.toWei("4","ether")});
+                assert(false,"was able to make transaction without paying");
+            }
+            catch(err){
+                assert(true);
+            }
+        });
+    });
+
+    it("Otherwise players should be able to join",()=>{
         return TicTacToe.deployed()
         .then(async function(instance){
-            await instance.joinGame({from:accounts[1],value:web3.utils.toWei("4","ether")});
             await instance.joinGame({from:accounts[2],value:web3.utils.toWei("4","ether")});
             return instance.getBalance();
         })
@@ -37,7 +79,6 @@ contract('tic',function(accounts){
             return a;
         })
         .then((a)=>{
-            // console.log(a);
             assert.equal(a[0],a[1]);
         });
     });
@@ -68,8 +109,11 @@ contract('tic',function(accounts){
             await instance.InBounds(-1,3).then((data)=>{a.push(data)});
             return a;
         }).then((resp)=>{
-            console.log(resp);
-            // assert()
+            truths = [ true,true,true,false,true,true,true,false,true,true,true,false,false,false,false,false,false,false,false,false];
+            for(var i=0;i<=truths.length;i++)
+            {
+                assert.isTrue(truths[i]==resp[i]);
+            }
         });
     });
 
@@ -91,6 +135,19 @@ contract('tic',function(accounts){
         
     });
 
+    it("Payers cannot move out of turn",async ()=>{
+        return TicTacToe.deployed()
+        .then(async function(instance){
+            try{
+                await instance.Move(1,1,{from:accounts[2]});
+            }
+            catch(err)
+            {
+                assert(true);
+            }
+        });
+    });
+
     it("Players should be able to Win",()=>{
         return TicTacToe.deployed()
         .then(async function(instance){
@@ -100,7 +157,6 @@ contract('tic',function(accounts){
             return instance.over();
         })
         .then(async function(values){
-            console.log(values);
             assert.isTrue(values);
         }); 
     });
@@ -118,7 +174,44 @@ contract('tic',function(accounts){
             assert.equal(a[1].valueOf(),0);
         });
     });
+    it("After 4 games there should be a single winner",()=>{
+        return TicTacToe.deployed()
+        .then(async function(instance){
+            // make player 1 win again (2 wins for him)
+            var winner;
+            await instance.Move(0,0,{from:accounts[1]});
+            await instance.Move(0,1,{from:accounts[2]});
+            await instance.Move(1,0,{from:accounts[1]});
+            await instance.Move(1,1,{from:accounts[2]});
+            await instance.Move(2,0,{from:accounts[1]});
+            await instance.Winner().then((data)=>{winner=data});
+            assert.equal(winner,1);
 
+            await instance.startNewGame();
+            //make player 1 win again (3 wins for him now)
+            await instance.Move(0,0,{from:accounts[2]});
+            await instance.Move(0,1,{from:accounts[1]});
+            await instance.Move(0,2,{from:accounts[2]});
+            await instance.Move(1,1,{from:accounts[1]});
+            await instance.Move(2,0,{from:accounts[2]});
+            await instance.Move(2,1,{from:accounts[1]});
+            await instance.Winner().then((data)=>{winner=data});
+            assert.equal(winner,1);
 
+            await instance.startNewGame();
+            //make player 2 win now
+            await instance.Move(0,0,{from:accounts[2]});
+            await instance.Move(0,1,{from:accounts[1]});
+            await instance.Move(1,0,{from:accounts[2]});
+            await instance.Move(1,1,{from:accounts[1]});
+            await instance.Move(2,0,{from:accounts[2]});
+            await instance.Winner().then((data)=>{winner=data});
+            assert.equal(winner,2);
 
+            var win_add;
+            await instance.FinalWinner().then((resp)=>{win_add=resp});
+            assert.equal(win_add,accounts[1]);
+
+        });
+    });
 });

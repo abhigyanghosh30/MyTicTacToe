@@ -6,6 +6,8 @@ contract tic {
     uint8 public cm;
     address p1;
     address p2;
+    uint8 p1_wins;
+    uint8 p2_wins;
     address public owner;
 
     enum Board { Empty, X, O}
@@ -16,6 +18,8 @@ contract tic {
         // p1 = msg.sender;
         
         owner=msg.sender;
+        p1_wins=0;
+        p2_wins=0;
         games=0;
         cm=0;
         for(uint8 i=0;i<3;i++)
@@ -184,8 +188,10 @@ contract tic {
     }
     
     function declareWinner() public {
-        if(Winner()==Board.X)
+        if(Winner()==Board.X){
+            p1_wins+=1;
             p1.transfer(2 ether);
+        }
         if(Winner()==Board.O)
             p2.transfer(2 ether);
         if(Winner()==Board.Empty){
@@ -223,12 +229,11 @@ contract tic {
    //games +=  1;
    function FinalWinner() public view returns(address) {
        require(games==3);
-       if(p1.balance >= p2.balance && p1.balance >= owner.balance)
+       if(p1_wins > p2_wins)
        return p1;
-       else if(p2.balance >= p1.balance && p2.balance >= owner.balance)
+       else if(p2_wins > p1_wins)
        return p2;
        else
        return owner;
-       
    }
 }
