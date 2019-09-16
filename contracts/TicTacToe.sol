@@ -54,7 +54,7 @@ contract tic {
     
     function joinGame() public payable{
         require(owner!= msg.sender && owner!=0x0);
-        require( msg.value == 1 ether);
+        require( msg.value == 4 ether);
         require(cm==0);
         if(p1==0)
         p1 = msg.sender;
@@ -93,7 +93,7 @@ contract tic {
     
     function printrow(uint8 y) public view returns(string)  {
         
-        return string(abi.encodePacked(tostring(0,y),"|",tostring(1,y),"|",tostring(2,y)));
+        return string(abi.encodePacked(tostring(0,y)," | ",tostring(1,y)," | ",tostring(2,y)));
     }
     
     function tostring(uint8 x, uint8 y) public view returns(string)
@@ -110,6 +110,22 @@ contract tic {
         if(board[x][y]==Board.Empty)
         {
             return " ";
+        }
+    }
+    
+    function PlayerMoves(uint8 m) public {
+        require(m<10);
+        if(m<=3)
+        {
+            Move(0,m-1);
+        }
+        else if(m > 3 && m<=6)
+        {
+            Move(1,m-4);
+        }
+        else
+        {
+            Move(2,m-7);
         }
     }
     
