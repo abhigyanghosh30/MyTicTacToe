@@ -5,11 +5,11 @@ contract('tic',function(accounts){
         return TicTacToe.deployed().then((instance)=>{
             return instance.getBalance();
         }).then((balance)=>{
-            assert.equal(balance.valueOf(), web3.utils.toWei("1","ether"), "1 ether wasnot paid");
+            assert.equal(balance.valueOf(), web3.utils.toWei("0","ether"), "Ether was paid. Contract should have zero ether before players join");
         });
     });
     let new_instance;
-    it("Another player should be able to join",()=>{
+    it("Players should be able to join",()=>{
         return TicTacToe.deployed().then((instance)=>{
             new_instance = instance;
         }).then(()=>{
@@ -17,11 +17,17 @@ contract('tic',function(accounts){
         }).then(()=>{
             return new_instance.getBalance();        
         }).then((balance)=>{
-            assert.equal(balance.valueOf(), web3.utils.toWei("2","ether"), "Final contract balance should have been 2 ethers");
+            assert.equal(balance.valueOf(), web3.utils.toWei("1","ether"), "Final contract balance should have been 1 ether after one player joins");
+        }).then(()=>{
+            new_instance.joinGame({from:accounts[2],value:web3.utils.toWei("1","ether")});
             return new_instance.printPlayers();
         }).then((players_tuple)=>{
-            assert.equal(players_tuple[1],accounts[1]);
-            assert.equal(players_tuple[0],accounts[0]);
+            assert.equal(players_tuple[0],accounts[1]);
+            assert.equal(players_tuple[1],accounts[2]);
+        }).then(()=>{
+            return new_instance.getBalance();        
+        }).then((balance)=>{
+            assert.equal(balance.valueOf(), web3.utils.toWei("2","ether"), "Final contract balance should have been 1 ether after one player joins");
         });
     });
     it("Player should be able to make a move",()=>{
