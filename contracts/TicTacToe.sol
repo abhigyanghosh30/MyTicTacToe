@@ -54,7 +54,7 @@ contract tic {
     
     function joinGame() public payable{
         require(owner!= msg.sender && owner!=0x0);
-        require( msg.value == 4 ether);
+        require( msg.value == 1 ether);
         require(cm==0);
         if(p1==0)
         p1 = msg.sender;

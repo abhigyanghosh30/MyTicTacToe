@@ -17,8 +17,8 @@ contract('tic',function(accounts){
         }).then(()=>{
             return new_instance.getBalance();        
         }).then((balance)=>{
+            console.log(balance.valueOf());
             assert.equal(balance.valueOf(), web3.utils.toWei("1","ether"), "Final contract balance should have been 1 ether after one player joins");
-        }).then(()=>{
             new_instance.joinGame({from:accounts[2],value:web3.utils.toWei("1","ether")});
             return new_instance.printPlayers();
         }).then((players_tuple)=>{
@@ -35,10 +35,13 @@ contract('tic',function(accounts){
             new_instance = instance;
         }).then(()=>{
             new_instance.joinGame({from:accounts[1],value:web3.utils.toWei("1","ether")});
+            new_instance.joinGame({from:accounts[2],value:web3.utils.toWei("1","ether")});
         }).then(()=>{
-            return new_instance.Move(1,1,{from:accounts[0]});
-        }).then((ret_vals)=>{
-            console.log(ret_vals);
+            new_instance.Move(1,1,{from:accounts[1]});
+        }).then(()=>{
+            return new_instance.tostring(1,1);
+        }).then((chara)=>{
+            assert.equal(chara,"X");
         });
     });
 });
