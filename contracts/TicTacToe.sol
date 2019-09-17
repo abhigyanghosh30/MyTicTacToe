@@ -9,6 +9,7 @@ contract tic {
     uint8 p1_wins;
     uint8 p2_wins;
     address public owner;
+    uint public timecounter;
 
     enum Board { Empty, X, O}
     Board[3][3] board;
@@ -29,6 +30,7 @@ contract tic {
                 board[i][j]=Board.Empty;
             }
         }
+        
     }
     
     function getBalance() public view returns (uint256) {
@@ -66,6 +68,7 @@ contract tic {
         {
             require(p1!=msg.sender);
             p2 = msg.sender;
+            timecounter = now + 10 minutes;
         }
     }
     
@@ -83,7 +86,7 @@ contract tic {
                 board[i][j]=Board.Empty;
             }
         }
-        
+        timecounter = now + 10 minutes;
         
     }
     
@@ -92,7 +95,7 @@ contract tic {
     function printBoard() public view returns(string ) {
         
         return string(abi.encodePacked("\n",printrow(0),"\n",printrow(1),"\n",printrow(2)));
-    }
+    }   
     
     
     function printrow(uint8 y) public view returns(string)  {
@@ -140,11 +143,12 @@ contract tic {
         require(InBounds(x,y));
         require(!over());
         require(turn()==msg.sender);
-        
+        require(timecounter >= now);
         require(board[x][y]==Board.Empty);
         // require(!over());
         board[x][y] = player();
         cm+=1;
+        timecounter = now + 10 minutes;
         
         if(over())
             declareWinner();
@@ -152,6 +156,16 @@ contract tic {
         //return (true,cm);
     
         
+    }
+    
+    function claimTimeout() public{
+        require(now>timecounter);
+        if(turn()==p1){
+            p2.transfer(2 ether);
+        }
+        if(turn()==p2){
+            p1.transfer(2 ether);
+        }
     }
     
     function InBounds(uint8 x, uint8 y) public pure returns(bool){
@@ -193,6 +207,7 @@ contract tic {
             p1.transfer(2 ether);
         }
         if(Winner()==Board.O)
+            p2_wins+=1;
             p2.transfer(2 ether);
         if(Winner()==Board.Empty){
             owner.transfer(1 ether);
