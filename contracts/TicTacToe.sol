@@ -164,10 +164,10 @@ contract tic {
     function claimTimeout() public{
         require(now > timecounter);
         if(turn()==p1){
-            p2.transfer(2 ether);
+            p2.transfer(address(this).balance);
         }
         if(turn()==p2){
-            p1.transfer(2 ether);
+            p1.transfer(address(this).balance);
         }
     }
     

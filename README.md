@@ -15,6 +15,6 @@
 ## To run tests
 
 > First compile using `truffle compile`. It should download the required solc version automatically 
-> Then we start the ganache network `ganache-cli -p 7545`
+> Then we start the ganache network `ganache-cli -p 7545 -e 100 -i 5777`
 > Deploy using `truffle deploy`
 > Run tests using `truffle test`
