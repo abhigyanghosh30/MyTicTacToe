@@ -206,9 +206,10 @@ contract tic {
             p1_wins+=1;
             p1.transfer(2 ether);
         }
-        if(Winner()==Board.O)
+        if(Winner()==Board.O){
             p2_wins+=1;
             p2.transfer(2 ether);
+            }
         if(Winner()==Board.Empty){
             owner.transfer(1 ether);
             owner.transfer(1 ether);
