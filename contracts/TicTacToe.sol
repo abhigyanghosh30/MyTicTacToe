@@ -142,12 +142,11 @@ contract tic {
     
     function Move(uint8 x, uint8 y) public
     {
-       
         require(cm<9);
         require(InBounds(x,y));
         require(!over());
         require(turn()==msg.sender);
-        // require(timecounter - now > 0);
+        require(timecounter - now > 0);
         require(board[x][y]==Board.Empty);
         // require(!over());
         board[x][y] = player();

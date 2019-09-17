@@ -46,11 +46,15 @@ contract('tic',function(accounts){
             // console.log(balance > eth3);
             if(balance > eth3){
                 balance -= parseInt(await web3.utils.toWei("2" ,"ether"));
-                // console.log("To be subtracted",balance);
-                await money_instance.transferETH(accounts[4],{from:accounts[3],value:balance});            
-                await web3.eth.getBalance(accounts[3]).then((data)=>{balance=data});
-                // console.log(balance);
             }
+            else{
+                balance = 1;
+            }
+            await money_instance.transferETH(accounts[4],{from:accounts[3],value:balance});            
+            await web3.eth.getBalance(accounts[3]).then((data)=>{balance=data});
+            return instance;
+        })
+        .then(async(instance)=>{
             try {
                 await instance.joinGame({from:accounts[3],value:web3.utils.toWei("4","ether")});
                 assert(false,"was able to make transaction without paying");
@@ -58,7 +62,7 @@ contract('tic',function(accounts){
             catch(err){
                 assert(true);
             }
-        });
+        })
     });
 
     it("Otherwise players should be able to join",()=>{
@@ -198,32 +202,19 @@ contract('tic',function(accounts){
             assert.equal(a[0].valueOf(),2);
             assert.equal(a[1].valueOf(),0);
 
-            await instance.printBoard().then((data)=>{console.log(data)});
             //make player 1 win again (3 wins for him now)
             await instance.PlayerMoves(1,{from:accounts[2]});
-            await instance.printBoard().then((data)=>{console.log(data)});
             await instance.PlayerMoves(2,{from:accounts[1]});
-            await instance.printBoard().then((data)=>{console.log(data)});
             await instance.PlayerMoves(3,{from:accounts[2]});
-            await instance.printBoard().then((data)=>{console.log(data)});
             await instance.PlayerMoves(4,{from:accounts[1]});
-            await instance.printBoard().then((data)=>{console.log(data)});
             await instance.PlayerMoves(5,{from:accounts[2]});
-            await instance.printBoard().then((data)=>{console.log(data)});
             await instance.PlayerMoves(7,{from:accounts[1]});
-            await instance.printBoard().then((data)=>{console.log(data)});
             await instance.PlayerMoves(6,{from:accounts[2]});
-            await instance.printBoard().then((data)=>{console.log(data)});
-            await instance.PlayerMoves(9,{from:accounts[1]});
-            
-            await instance.printBoard().then((data)=>{console.log(data)});
-            await instance.cm.call().then((data)=>{console.log(data)});
-            
+            await instance.PlayerMoves(9,{from:accounts[1]});            
             await instance.PlayerMoves(8,{from:accounts[2]});
             // await instance.Winner().then((data)=>{winner=data});
             // assert.equal(winner,0);
             // console.log(winner);
-            await instance.printBoard().then((data)=>{console.log(data)});
 
             await instance.startNewGame();
             //make player 2 win now
