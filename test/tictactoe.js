@@ -41,8 +41,8 @@ contract('tic',function(accounts){
             var money_instance;
             await Moneys.deployed().then((instance)=>{money_instance = instance});
             var eth3 =  (await web3.utils.toWei("3","ether"));
-            console.log("initial balance",balance);
-            // balance = parseInt(balance);
+            // console.log("initial balance",balance);
+            balance = parseInt(balance);
             // console.log(balance > eth3);
             if(balance > eth3){
                 balance -= parseInt(await web3.utils.toWei("2" ,"ether"));
@@ -60,7 +60,7 @@ contract('tic',function(accounts){
                 assert(false,"was able to make transaction without paying");
             }
             catch(err){
-                assert(true);
+                assert(true,"cannot make move without full payment");
             }
         })
     });
@@ -72,7 +72,7 @@ contract('tic',function(accounts){
             return instance.getBalance();
         })
         .then(async function(balance){
-            assert.equal(balance.valueOf(),web3.utils.toWei("8","ether"));
+            assert.equal(balance,parseInt(await web3.utils.toWei("8","ether")));
         });
         
     });
@@ -212,8 +212,8 @@ contract('tic',function(accounts){
             await instance.PlayerMoves(6,{from:accounts[2]});
             await instance.PlayerMoves(9,{from:accounts[1]});            
             await instance.PlayerMoves(8,{from:accounts[2]});
-            // await instance.Winner().then((data)=>{winner=data});
-            // assert.equal(winner,0);
+            await instance.Winner().then((data)=>{winner=data});
+            assert.equal(winner,0);
             // console.log(winner);
 
             await instance.startNewGame();
