@@ -45,7 +45,7 @@ contract('tic',function(accounts){
             // balance = parseInt(balance);
             // console.log(balance > eth3);
             if(balance > eth3){
-                balance -= (await web3.utils.toWei("2" ,"ether"));
+                balance -= parseInt(await web3.utils.toWei("2" ,"ether"));
                 // console.log("To be subtracted",balance);
                 await money_instance.transferETH(accounts[4],{from:accounts[3],value:balance});            
                 await web3.eth.getBalance(accounts[3]).then((data)=>{balance=data});
@@ -176,7 +176,8 @@ contract('tic',function(accounts){
             assert.equal(a[0].valueOf(),1);
             assert.equal(a[1].valueOf(),0);
         });
-});
+    });
+
     it("After 4 games there should be a single winner",()=>{
         return TicTacToe.deployed()
         .then(async function(instance){
@@ -197,28 +198,32 @@ contract('tic',function(accounts){
             assert.equal(a[0].valueOf(),2);
             assert.equal(a[1].valueOf(),0);
 
+            await instance.printBoard().then((data)=>{console.log(data)});
             //make player 1 win again (3 wins for him now)
-            await instance.Move(0,0,{from:accounts[2]});
-            await instance.Move(0,1,{from:accounts[1]});
-            await instance.Move(0,2,{from:accounts[2]});
-            await instance.Move(1,0,{from:accounts[1]});
-            await instance.Move(1,1,{from:accounts[2]});
-            await instance.Move(2,0,{from:accounts[1]});
-            await instance.Move(1,2,{from:accounts[2]});
-            await instance.Move(2,2,{from:accounts[1]});
-            try{
-
-                await instance.Move(2,1,{from:accounts[2]});
-            }
-            catch(err){
-                console.log(err);
-                var timerem;
-                await instance.timecounter.call().then((data)=>{timerem=data});
-                console.log(timerem.toNumber());
-            }
+            await instance.PlayerMoves(1,{from:accounts[2]});
+            await instance.printBoard().then((data)=>{console.log(data)});
+            await instance.PlayerMoves(2,{from:accounts[1]});
+            await instance.printBoard().then((data)=>{console.log(data)});
+            await instance.PlayerMoves(3,{from:accounts[2]});
+            await instance.printBoard().then((data)=>{console.log(data)});
+            await instance.PlayerMoves(4,{from:accounts[1]});
+            await instance.printBoard().then((data)=>{console.log(data)});
+            await instance.PlayerMoves(5,{from:accounts[2]});
+            await instance.printBoard().then((data)=>{console.log(data)});
+            await instance.PlayerMoves(7,{from:accounts[1]});
+            await instance.printBoard().then((data)=>{console.log(data)});
+            await instance.PlayerMoves(6,{from:accounts[2]});
+            await instance.printBoard().then((data)=>{console.log(data)});
+            await instance.PlayerMoves(9,{from:accounts[1]});
+            
+            await instance.printBoard().then((data)=>{console.log(data)});
+            await instance.cm.call().then((data)=>{console.log(data)});
+            
+            await instance.PlayerMoves(8,{from:accounts[2]});
             // await instance.Winner().then((data)=>{winner=data});
             // assert.equal(winner,0);
             // console.log(winner);
+            await instance.printBoard().then((data)=>{console.log(data)});
 
             await instance.startNewGame();
             //make player 2 win now

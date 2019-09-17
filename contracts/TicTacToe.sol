@@ -32,6 +32,10 @@ contract tic {
         }
         
     }
+
+    function getCurrentTime() public view returns(uint){
+        return now;
+    }
     
     function getBalance() public view returns (uint256) {
         return address(this).balance;
@@ -100,7 +104,7 @@ contract tic {
     
     function printrow(uint8 y) public view returns(string)  {
         
-        return string(abi.encodePacked(tostring(0,y)," | ",tostring(1,y)," | ",tostring(2,y)));
+        return string(abi.encodePacked(tostring(y,0)," | ",tostring(y,1)," | ",tostring(y,2)));
     }
     
     function tostring(uint8 x, uint8 y) public view returns(string)
@@ -121,7 +125,7 @@ contract tic {
     }
     
     function PlayerMoves(uint8 m) public {
-        require(m<10);
+        require(m<10 &&  m>0);
         if(m<=3)
         {
             Move(0,m-1);
@@ -139,11 +143,11 @@ contract tic {
     function Move(uint8 x, uint8 y) public
     {
        
-        //require(cm<=9);
+        require(cm<9);
         require(InBounds(x,y));
         require(!over());
         require(turn()==msg.sender);
-        require(timecounter >= now);
+        // require(timecounter - now > 0);
         require(board[x][y]==Board.Empty);
         // require(!over());
         board[x][y] = player();
@@ -159,7 +163,7 @@ contract tic {
     }
     
     function claimTimeout() public{
-        require(now>timecounter);
+        require(now > timecounter);
         if(turn()==p1){
             p2.transfer(2 ether);
         }
@@ -206,9 +210,10 @@ contract tic {
             p1_wins+=1;
             p1.transfer(2 ether);
         }
-        if(Winner()==Board.O)
+        if(Winner()==Board.O){
             p2_wins+=1;
             p2.transfer(2 ether);
+        }
         if(Winner()==Board.Empty){
             owner.transfer(1 ether);
             owner.transfer(1 ether);
